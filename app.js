@@ -1,17 +1,22 @@
 const express = require("express")
 const app = express()
 const {getTopics} = require("./controllers/topics.controllers")
+const {getApi} = require("./controllers/api.controllers")
+
+
 
 app.use(express.json())
 
+app.get('/api/topics', getTopics)
 
-app.get('/api/topics', getTopics);
+app.get('/api', getApi)
 
+
+//Error handling:
 app.get('*',(req,res) => {
     res.status(404).send({msg : "not found"})
 
 })
-
 
 app.use((err, req, res, next) => {
     res.status(err.status).send({msg : err.msg})

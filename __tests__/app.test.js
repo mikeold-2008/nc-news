@@ -3,6 +3,7 @@ const app = require('../app')
 const data = require("../db/data/test-data/index")
 const db = require("../db/connection")
 const seed = require("../db/seeds/seed")
+const endpoints = require("../endpoints.json")
 
 beforeAll(() => {
     return seed(data)
@@ -26,9 +27,11 @@ describe('GET/api/topics', () => {
               expect(typeof topic.description).toBe("string")
           })
         })  
-      })
+      })     
+});
 
-      test('Responds with 404 if incorrect path specified', () => {
+describe('/GET incorrect path', () => {
+    test('Responds with 404 if incorrect path specified', () => {
         return request(app)
         .get('/api/notTopics')
         .expect(404)
@@ -36,7 +39,16 @@ describe('GET/api/topics', () => {
           expect(body.msg).toBe("not found")
         })  
       })
+});
 
-      
 
+describe('/GET api', () => {
+    test('Responds information on available api endpoints', () => {
+        return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toEqual(endpoints)
+        })  
+      })
 });
