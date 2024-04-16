@@ -3,6 +3,7 @@ const {fetchArticleById, fetchArticles} = require("../models/articles.models")
 
 function getArticleById(req,res,next){
     const id = req.params
+
     fetchArticleById(id)
     .then((article) => {
         res.status(200).send(article)
