@@ -27,6 +27,7 @@ describe('/GET incorrect path', () => {
 
 
 describe('GET/api/topics', () => {
+
     test('Responds with 200 code & with array of topics, each with: slug, description ', () => {
         return request(app)
         .get('/api/topics')
@@ -58,7 +59,7 @@ describe('/GET api', () => {
 describe('/GET api/articles:article_id', () => {
 
     test('Responds with the correct article for the given article_id', () => {
-        let article = {
+        const article = {
             article_id: 1,
             title: 'Living in the shadow of a great man',
             topic: 'mitch',
@@ -73,14 +74,6 @@ describe('/GET api/articles:article_id', () => {
         .expect(200)
         .then(({ body }) => {  
         expect(body).toEqual(article)
-        expect(typeof body.author).toBe("string");
-        expect(typeof body.title).toBe("string");
-        expect(typeof body.article_id).toBe("number");
-        expect(typeof body.body).toBe("string");
-        expect(typeof body.topic).toBe("string");
-        expect(typeof body.created_at).toBe("string");
-        expect(typeof body.votes).toBe("number");
-        expect(typeof body.article_img_url).toBe("string");
         })  
       })
 
@@ -103,4 +96,30 @@ describe('/GET api/articles:article_id', () => {
             expect(body.msg).toBe("Bad request")
         })  
     });
+});
+
+
+describe('/GET /api/articles', () => {
+
+    test('Responds with 200 code & with array of articles, each with: author,title,article_id,topic,created_at,votes,article_img_url,description ', () => {
+    return request(app)
+    .get('/api/articles')
+    .expect(200)
+    .then(({ body }) => {
+    const articles = body
+    expect(articles).toHaveLength(13)
+    expect(articles).toBeSortedBy("created_at",{descending: true,coerce:true})
+        articles.forEach((article) => {
+        expect(typeof article.author).toBe("string")
+        expect(typeof article.title).toBe("string")
+        expect(typeof article.article_id).toBe("number")
+        expect(typeof article.topic).toBe("string")
+        expect(typeof article.created_at).toBe("string")
+        expect(typeof article.votes).toBe("number")
+        expect(typeof article.article_img_url).toBe("string")
+        expect(typeof article.comment_count).toBe("number")
+        expect(article.body).toBe(undefined)
+        })
+    })  
+    }) 
 });
