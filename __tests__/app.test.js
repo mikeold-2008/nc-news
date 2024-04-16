@@ -4,6 +4,7 @@ const data = require("../db/data/test-data/index")
 const db = require("../db/connection")
 const seed = require("../db/seeds/seed")
 const endpoints = require("../endpoints.json")
+const { postComments } = require('../controllers/comments.controllers')
 
 beforeAll(() => {
     return seed(data)
@@ -14,8 +15,8 @@ afterAll(() => {
 })
 
 
-describe('/GET incorrect path', () => {
-    test('Responds with 404 if incorrect path specified', () => {
+describe('/incorrectpath', () => {
+    test('GET 404: Responds with error if incorrect path specified', () => {
         return request(app)
         .get('/api/notTopics')
         .expect(404)
@@ -26,9 +27,20 @@ describe('/GET incorrect path', () => {
 });
 
 
-describe('GET /api/topics', () => {
+describe('/api', () => {
+  test('GET 200: Responds with information on available api endpoints', () => {
+      return request(app)
+      .get('/api')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual(endpoints)
+      })  
+    })
+});
 
-    test('Responds with 200 code & with array of topics, each with: slug, description ', () => {
+describe('/api/topics', () => {
+
+    test('GET 200: Responds with 200 code & with array of topics, each with: slug, description ', () => {
         return request(app)
         .get('/api/topics')
         .expect(200)
@@ -44,21 +56,9 @@ describe('GET /api/topics', () => {
 });
 
 
-describe('/GET api', () => {
-    test('Responds with information on available api endpoints', () => {
-        return request(app)
-        .get('/api')
-        .expect(200)
-        .then(({ body }) => {
-          expect(body).toEqual(endpoints)
-        })  
-      })
-});
+describe('/api/articles:article_id', () => {
 
-
-describe('/GET api/articles:article_id', () => {
-
-    test('Responds with the correct article for the given article_id', () => {
+    test('GET 200: Responds with the correct article for the given article_id', () => {
         const article = {
             article_id: 1,
             title: 'Living in the shadow of a great man',
@@ -78,7 +78,7 @@ describe('/GET api/articles:article_id', () => {
       })
 
 
-    test('Responds with 404 Not found for an article_id not found in the dataset', () => {
+    test('GET 404: Responds with 404 for an article_id not found', () => {
         return request(app)
         .get('/api/articles/999999')
         .expect(404)
@@ -88,7 +88,7 @@ describe('/GET api/articles:article_id', () => {
     });
 
 
-    test('Resonds with 400 bad request for an invalid article_id', () => {
+    test('GET 400: Resonds with error for an invalid article_id', () => {
         return request(app)
         .get('/api/articles/not-an-id-number')
         .expect(400)
@@ -99,9 +99,9 @@ describe('/GET api/articles:article_id', () => {
 });
 
 
-describe('/GET /api/articles', () => {
+describe('/api/articles', () => {
 
-    test('Responds with 200 & with array of articles', () => {
+    test('GET 200: Responds with 200 & with array of articles', () => {
     return request(app)
     .get('/api/articles')
     .expect(200)
@@ -125,9 +125,9 @@ describe('/GET /api/articles', () => {
 });
 
 
-describe('GET /api/articles/:article_id/comments', () => {
+describe('/api/articles/:article_id/comments', () => {
 
-  test('Responds with 200 and array of comments (for a valid article ID & where comments exist)', () => {
+  test('GET 200: Responds with 200 and array of comments (for a valid article ID & where comments exist)', () => {
     return request(app)
     .get('/api/articles/1/comments')
     .expect(200)
@@ -145,7 +145,7 @@ describe('GET /api/articles/:article_id/comments', () => {
     })  
   });
 
-  test('Responds with the list of comments sorted by date desc.', () => {
+  test('GET 200: Responds with the list of comments sorted by date desc.', () => {
     return request(app)
     .get('/api/articles/1/comments')
     .expect(200)
@@ -156,7 +156,7 @@ describe('GET /api/articles/:article_id/comments', () => {
   });
 
 
-  test('Responds with 200 and empty array for a valid article_id which has no comments associated', () => {
+  test('GET 200: Responds with 200 and empty array for a valid article_id which has no comments associated', () => {
   return request(app)
   .get('/api/articles/4/comments')
   .expect(200)
@@ -166,7 +166,7 @@ describe('GET /api/articles/:article_id/comments', () => {
   });
 
 
-  test('Responds with 404 when article_id is valid but non-existent', () => {
+  test('GET 404: Responds with not found when article_id is valid but non-existent', () => {
     return request(app)
     .get('/api/articles/99999/comments')
     .expect(404)
@@ -176,7 +176,7 @@ describe('GET /api/articles/:article_id/comments', () => {
    });
 
 
-   test('Responds with 400 Invalid article ID when article_id is not of a valid type', () => {
+   test('GET 400: Responds with error ID when article_id is not of a valid type', () => {
     return request(app)
     .get('/api/articles/not-an-id-number/comments')
     .expect(400)
@@ -186,5 +186,88 @@ describe('GET /api/articles/:article_id/comments', () => {
    });
 
 
+   test('POST 201: Responds with created comment upon successful POST', () => {
+    let commentToAdd = {
+      username: 'rogersop',
+      body: 'Foo bar'
+    }
+    return request(app)
+    .post('/api/articles/1/comments')
+    .send(commentToAdd)
+    .expect(201)
+    .then(( result ) => { 
+      expect(result.body.comment).toMatchObject({
+        author: 'rogersop',
+        body: 'Foo bar',
+        article_id: 1
+      })
+      expect(result.body.comment.hasOwnProperty("votes")).toBe(true);
+      expect(result.body.comment.hasOwnProperty("created_at")).toBe(true);
+    })  
+   });
+
+
+   test('POST 400: Responds with error when passed a body with missing information', () => {
+    let commentToAdd = {
+      username: 'rogersop'
+    }
+    return request(app)
+    .post('/api/articles/1/comments')
+    .send(commentToAdd)
+    .expect(400)
+    .then(( {body} ) => { 
+      expect(body.msg).toBe("Missing required information")
+    })  
+   });
+
+
+   test('POST 400: Responds with error when article id which is valid but non-existent', () => {
+    let commentToAdd = {
+      username: 'rogersop',
+      body: 'Foo bar'
+    }
+    return request(app)
+    .post('/api/articles/99999/comments')
+    .send(commentToAdd)
+    .expect(404)
+    .then(( {body} ) => { 
+      expect(body.msg).toBe("Article ID not found")
+    })  
+   });
+
+
+   test('POST 400: Responds with error when given invalid article id', () => {
+    let commentToAdd = {
+      username: 'rogersop',
+      body: 'Foo bar'
+    }
+    return request(app)
+    .post('/api/articles/not-an-article-id/comments')
+    .send(commentToAdd)
+    .expect(400)
+    .then(({ body }) => {  
+    expect(body.msg).toBe("Invalid article ID")
+    })
+   });
+
+   test("POST: 400 responds with error message when given a non-existent username", () => {
+    let commentToAdd = { 
+      username: "notausername",
+      body: "Foo bar" 
+    }
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentToAdd)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+
+   
+
 
 });
+
+
