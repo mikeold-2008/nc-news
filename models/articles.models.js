@@ -18,12 +18,11 @@ function fetchArticleById(id){
 }
 
 
-
 function checkArticleExists(article_id){
 
   if(/^\d+$/.test(article_id) === false){
     return Promise.reject({status: 400, msg:"Invalid article ID"})
-}
+  }
 
   return db.query('SELECT * FROM articles WHERE article_id = $1', [article_id])
   .then((result) => {
@@ -32,8 +31,6 @@ function checkArticleExists(article_id){
     }
   })
 }
-
-
 
 
 function fetchArticles(){

@@ -1,5 +1,5 @@
 const app = require("../app")
-const {fetchCommentsByArticleId} = require("../models/comments.models")
+const {fetchCommentsByArticleId,insertComments} = require("../models/comments.models")
 const {checkArticleExists} = require("../models/articles.models")
 
 function getCommentsByArticleId(req,res,next){
@@ -14,4 +14,21 @@ function getCommentsByArticleId(req,res,next){
 }
 
 
-module.exports = {getCommentsByArticleId}
+
+function postComments(req,res,next){
+    const {username,body} = req.body
+    const {article_id} = req.params
+    
+    Promise.all(
+        [insertComments(username,body,article_id),checkArticleExists(article_id)]
+    )
+    .then(([comment]) => {
+        res.status(201).send({comment})
+    })
+    .catch((err) => {
+        next(err)
+    })
+}
+
+
+module.exports = {getCommentsByArticleId, postComments}
