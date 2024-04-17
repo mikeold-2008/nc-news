@@ -134,7 +134,7 @@ describe('/api/articles:article_id', () => {
     });
 
 
-    test('PATCH 404: Responds with not found for invalid article ID number', () => {
+    test('PATCH 404: Responds with not found for article ID number not in dataset', () => {
     let voteNumber = {inc_votes: 50}
     return request(app)
     .patch('/api/articles/9999')
