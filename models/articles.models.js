@@ -7,8 +7,9 @@ function fetchArticleById(id){
     if(/^\d+$/.test(article_id) === false){
         return Promise.reject({status: 400, msg:"Bad request"})
     }
+    let sqlString = 'SELECT articles.*, COUNT(comments.comment_id)::INT AS comment_count FROM articles    LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id ORDER BY created_at DESC'
 
-    return db.query('SELECT * FROM articles WHERE article_id = $1', [article_id])
+    return db.query(sqlString, [article_id])
     .then((result) => {
       if(result.rows.length === 0){
         return Promise.reject({status: 404, msg:"Couldn't find requested article"})
