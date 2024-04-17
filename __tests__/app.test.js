@@ -4,7 +4,7 @@ const data = require("../db/data/test-data/index")
 const db = require("../db/connection")
 const seed = require("../db/seeds/seed")
 const endpoints = require("../endpoints.json")
-const { postComments } = require('../controllers/comments.controllers')
+
 
 beforeEach(() => {
     return seed(data)
@@ -343,4 +343,33 @@ describe('/api/articles/:article_id/comments', () => {
 
 });
 
+describe('/api/comments/:comment_id', () => {
 
+  test('DELETE 204: Responds with empty object upon successful comment deletion', () => {
+    return request(app)
+    .delete('/api/comments/1')
+    .expect(204)
+    .then(({ body }) => {
+      expect(body).toEqual({})
+    })  
+  });
+
+  test('DELETE 404: Responds with error when trying to delete comment that doesnt exist', () => {
+    return request(app)
+    .delete('/api/comments/999999')
+    .expect(404)
+    .then(({ body }) => {
+      expect(body).toEqual({msg:"Not found"})
+    })  
+  });
+
+  test('DELETE 400: Responds with error when trying to delete comment with invalid id', () => {
+    return request(app)
+    .delete('/api/comments/not-an-id-number')
+    .expect(400)
+    .then(({ body }) => {
+      expect(body).toEqual({msg:"Bad request"})
+    })  
+  });
+
+});
