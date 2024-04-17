@@ -36,7 +36,7 @@ function deleteCommentById(req,res,next){
     .then(
     removeCommentById(comment_id)
     .then((comment) => {
-        res.status(204).send({})
+        res.status(204).send()
     })
     .catch((err) => {
         next(err)

@@ -14,13 +14,9 @@ function fetchCommentsByArticleId(article_id){
 
 function insertComments(username,body,article_id){
 
-    if(!username || !body || !article_id){
-        return Promise.reject({status: 400, msg:"Missing required information"})
-    }
+    let sqlQueryString = 'INSERT INTO comments (article_id,author,body) VALUES ($1, $2, $3) RETURNING *'
 
-    let sqlString = 'INSERT INTO comments (article_id,author,body) VALUES ($1, $2, $3) RETURNING *'
-
-    return db.query(sqlString,[article_id,username,body])
+    return db.query(sqlQueryString,[article_id,username,body])
     .then((result) => {
         return result.rows[0]
     })
@@ -28,9 +24,9 @@ function insertComments(username,body,article_id){
 
 
 function removeCommentById(comment_id){
-    let sqlString = 'DELETE FROM comments WHERE comment_id = $1 RETURNING *'
+    let sqlQueryString = 'DELETE FROM comments WHERE comment_id = $1 RETURNING *'
 
-    return db.query(sqlString,[comment_id])
+    return db.query(sqlQueryString,[comment_id])
     .then((result) => {
         return result.rows[0]
     })

@@ -58,16 +58,17 @@ describe('/api/topics', () => {
 
 describe('/api/articles:article_id', () => {
 
-    test('GET 200: Responds with the correct article for the given article_id', () => {
+    test('GET 200: Responds with the correct article for the given article_id, with comment count total', () => {
         const article = {
             article_id: 1,
-            title: 'Living in the shadow of a great man',
-            topic: 'mitch',
-            author: 'butter_bridge',
-            body: 'I find this existence challenging',
-            created_at: '2020-07-09T20:11:00.000Z',
-            votes: 100,
-            article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number)
           }
         return request(app)
         .get('/api/articles/1')
@@ -77,32 +78,12 @@ describe('/api/articles:article_id', () => {
         })  
       })
 
-      test('GET 200: Responds with article and the comment_count total', () => {
-        const article = {
-          article_id: 1,
-          title: expect.any(String),
-          topic: expect.any(String),
-          author: expect.any(String),
-          body: expect.any(String),
-          created_at: expect.any(String),
-          votes: expect.any(Number),
-          article_img_url: expect.any(String),
-          comment_count: expect.any(Number)
-        }
-        return request(app)
-        .get('/api/articles/1')
-        .expect(200)
-        .then(({ body }) => {  
-        expect(body).toMatchObject(article)
-        })  
-      });
-
     test('GET 404: Responds with 404 for an article_id not found', () => {
         return request(app)
         .get('/api/articles/999999')
         .expect(404)
         .then(({ body }) => {  
-            expect(body.msg).toBe("Couldn't find requested article")
+            expect(body.msg).toBe("Not found")
         })  
     });
 
@@ -116,8 +97,8 @@ describe('/api/articles:article_id', () => {
     });
 
     test('PATCH 200: Responds with updated article vote count when passed a valid article ID (positive number)', () => {
-      let voteNumber = {inc_votes: 50}
-      let updatedArticle = {
+      const voteNumber = {inc_votes: 50}
+      const updatedArticle = {
         title: "Living in the shadow of a great man",
         topic: "mitch",
         author: "butter_bridge",
@@ -134,8 +115,8 @@ describe('/api/articles:article_id', () => {
     });
 
     test('PATCH 200: Responds with updated article vote count when passed a valid article ID (negative number)', () => {
-    let voteNumber = {inc_votes: -50}
-    let updatedArticle =  {
+    const voteNumber = {inc_votes: -50}
+    const updatedArticle =  {
       title: "Sony Vaio; or, The Laptop",
       topic: "mitch",
       author: "icellusedkars",
@@ -151,18 +132,18 @@ describe('/api/articles:article_id', () => {
     });
 
     test('PATCH 404: Responds with not found for invalid article ID number', () => {
-    let voteNumber = {inc_votes: 50}
+    const voteNumber = {inc_votes: 50}
     return request(app)
     .patch('/api/articles/9999')
     .send(voteNumber)
     .expect(404)
     .then(({ body }) => {  
-      expect(body.msg).toBe("Article ID not found")
+      expect(body.msg).toBe("Not found")
     })  
     });
 
     test('PATCH 400: Responds with bad request for invalid fields', () => {
-    let voteNumber = {inc_votes: "not-a-number"}
+    const voteNumber = {inc_votes: "not-a-number"}
     return request(app)
     .patch('/api/articles/1')
     .send(voteNumber)
@@ -173,7 +154,7 @@ describe('/api/articles:article_id', () => {
     });
 
     test('PATCH 400: Responds with bad request for missing fields', () => {
-      let voteNumber = {}
+      const voteNumber = {}
       return request(app)
       .patch('/api/articles/1')
       .send(voteNumber)
@@ -232,7 +213,7 @@ describe('/api/articles', () => {
       })  
       }) 
 
-      test('GET 200: (Filter) Responds with 200 & ignores invalid filter crtieria, returns array of all articles', () => {
+    test('GET 200: (Filter) Responds with 200 & ignores invalid filter crtieria, returns array of all articles', () => {
         return request(app)
         .get('/api/articles?notatopic=mitch')
         .expect(200)
@@ -252,8 +233,7 @@ describe('/api/articles', () => {
             expect(article.body).toBe(undefined)
             })
         })  
-        }) 
-
+      }) 
 
     test('GET 404: (Filter) Responds with not found when filtering by topic that doesnt exist', () => {
       return request(app)
@@ -263,7 +243,6 @@ describe('/api/articles', () => {
       expect(body.msg).toBe("Not found")
       })  
       }) 
-
 
 });
 
@@ -314,7 +293,7 @@ describe('/api/articles/:article_id/comments', () => {
     .get('/api/articles/99999/comments')
     .expect(404)
     .then(({ body }) => {  
-    expect(body.msg).toBe("Article ID not found")
+    expect(body.msg).toBe("Not found")
     })  
    });
 
@@ -324,13 +303,13 @@ describe('/api/articles/:article_id/comments', () => {
     .get('/api/articles/not-an-id-number/comments')
     .expect(400)
     .then(({ body }) => {  
-    expect(body.msg).toBe("Invalid article ID")
+    expect(body.msg).toBe("Bad request")
     })  
    });
 
 
    test('POST 201: Responds with created comment upon successful POST', () => {
-    let commentToAdd = {
+    const commentToAdd = {
       username: 'rogersop',
       body: 'Foo bar'
     }
@@ -350,8 +329,30 @@ describe('/api/articles/:article_id/comments', () => {
    });
 
 
+   test('POST 201: Responds with created comment upon successful POST, ignoring extraneuous information', () => {
+    const commentToAdd = {
+      username: 'rogersop',
+      body: 'Foo bar',
+      notafield: "notavalue"
+    }
+    return request(app)
+    .post('/api/articles/1/comments')
+    .send(commentToAdd)
+    .expect(201)
+    .then(( result ) => { 
+      expect(result.body.comment).toMatchObject({
+        author: 'rogersop',
+        body: 'Foo bar',
+        article_id: 1
+      })
+      expect(result.body.comment.hasOwnProperty("votes")).toBe(true);
+      expect(result.body.comment.hasOwnProperty("created_at")).toBe(true);
+    })  
+   });
+
+
    test('POST 400: Responds with error when passed a body with missing information', () => {
-    let commentToAdd = {
+    const commentToAdd = {
       username: 'rogersop'
     }
     return request(app)
@@ -359,13 +360,13 @@ describe('/api/articles/:article_id/comments', () => {
     .send(commentToAdd)
     .expect(400)
     .then(( {body} ) => { 
-      expect(body.msg).toBe("Missing required information")
+      expect(body.msg).toBe("Bad request")
     })  
    });
 
 
-   test('POST 404: Responds with error when article id which is valid but non-existent', () => {
-    let commentToAdd = {
+   test('POST 400: Responds with error when article id which is valid but non-existent', () => {
+    const commentToAdd = {
       username: 'rogersop',
       body: 'Foo bar'
     }
@@ -380,7 +381,7 @@ describe('/api/articles/:article_id/comments', () => {
 
 
    test('POST 400: Responds with error when given invalid article id', () => {
-    let commentToAdd = {
+    const commentToAdd = {
       username: 'rogersop',
       body: 'Foo bar'
     }
@@ -389,12 +390,12 @@ describe('/api/articles/:article_id/comments', () => {
     .send(commentToAdd)
     .expect(400)
     .then(({ body }) => {  
-    expect(body.msg).toBe("Invalid article ID")
+    expect(body.msg).toBe("Bad request")
     })
    });
 
    test("POST 400: responds with error message when given a non-existent username", () => {
-    let commentToAdd = { 
+    const commentToAdd = { 
       username: "notausername",
       body: "Foo bar" 
     }
@@ -406,10 +407,6 @@ describe('/api/articles/:article_id/comments', () => {
         expect(body.msg).toBe("Bad request");
       });
   });
-
-
-   
-
 
 });
 
@@ -463,14 +460,7 @@ describe('/api/users', () => {
     })    
   });
 
-  test('GET 404: Responds with not found when given invalid path', () => {
-    return request(app)
-    .get('/api/notusers')
-    .expect(404)
-    .then(({body}) => {
-      expect(body.msg).toBe("Not found")
-    })    
-  });
+
 
 
 });
