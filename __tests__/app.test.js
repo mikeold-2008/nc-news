@@ -195,6 +195,62 @@ describe('/api/articles', () => {
         })
     })  
     }) 
+
+    test('GET 200: (Filter) Responds with 200 & array of articles filtered by topic', () => {
+      return request(app)
+      .get('/api/articles?topic=mitch')
+      .expect(200)
+      .then(({ body }) => {
+      const articles = body
+      expect(articles).toHaveLength(12)
+      expect(articles).toBeSortedBy("created_at",{descending: true,coerce:true})
+          articles.forEach((article) => {
+          expect(typeof article.author).toBe("string")
+          expect(typeof article.title).toBe("string")
+          expect(typeof article.article_id).toBe("number")
+          expect(typeof article.created_at).toBe("string")
+          expect(typeof article.votes).toBe("number")
+          expect(typeof article.article_img_url).toBe("string")
+          expect(typeof article.comment_count).toBe("number")
+          expect(article.body).toBe(undefined)
+          expect(article.topic).toEqual("mitch")
+          })
+      })  
+      }) 
+
+      test('GET 200: (Filter) Responds with 200 & ignores invalid filter crtieria, returns array of all articles', () => {
+        return request(app)
+        .get('/api/articles?notatopic=mitch')
+        .expect(200)
+        .then(({ body }) => {
+        const articles = body
+        expect(articles).toHaveLength(13)
+        expect(articles).toBeSortedBy("created_at",{descending: true,coerce:true})
+            articles.forEach((article) => {
+            expect(typeof article.author).toBe("string")
+            expect(typeof article.title).toBe("string")
+            expect(typeof article.article_id).toBe("number")
+            expect(typeof article.topic).toBe("string")
+            expect(typeof article.created_at).toBe("string")
+            expect(typeof article.votes).toBe("number")
+            expect(typeof article.article_img_url).toBe("string")
+            expect(typeof article.comment_count).toBe("number")
+            expect(article.body).toBe(undefined)
+            })
+        })  
+        }) 
+
+
+    test('GET 404: (Filter) Responds with not found when filtering by topic that doesnt exist', () => {
+      return request(app)
+      .get('/api/articles?topic=notatopic')
+      .expect(404)
+      .then(({ body }) => {
+      expect(body.msg).toBe("Not found")
+      })  
+      }) 
+
+
 });
 
 
@@ -323,7 +379,7 @@ describe('/api/articles/:article_id/comments', () => {
     })
    });
 
-   test("POST: 400 responds with error message when given a non-existent username", () => {
+   test("POST 400: responds with error message when given a non-existent username", () => {
     let commentToAdd = { 
       username: "notausername",
       body: "Foo bar" 
@@ -384,6 +440,7 @@ describe('/api/users', () => {
     .expect(200)
     .then(({body}) => {
       const {users} = body
+      expect(users.length).not.toBe(0)
       users.forEach((user) => {
         expect(typeof user.username).toBe("string")
         expect(typeof user.name).toBe("string")
