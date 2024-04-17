@@ -373,3 +373,33 @@ describe('/api/comments/:comment_id', () => {
   });
 
 });
+
+
+
+describe('/api/users', () => {
+  
+  test('GET 200: Responds with list of users', () => {
+    return request(app)
+    .get('/api/users')
+    .expect(200)
+    .then(({body}) => {
+      const {users} = body
+      users.forEach((user) => {
+        expect(typeof user.username).toBe("string")
+        expect(typeof user.name).toBe("string")
+        expect(typeof user.avatar_url).toBe("string")
+      })
+    })    
+  });
+
+  test('GET 404: Responds with not found when given invalid path', () => {
+    return request(app)
+    .get('/api/notusers')
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("Not found")
+    })    
+  });
+
+
+});
