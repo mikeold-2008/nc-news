@@ -44,5 +44,24 @@ function fetchArticles(){
 
 }
 
+function updateArticle(article_id,newVoteTotal){
 
-module.exports={fetchArticleById, fetchArticles, checkArticleExists}
+  return db.query('UPDATE articles SET votes = $1 WHERE article_id = $2 RETURNING *', [newVoteTotal,article_id])
+  .then((result) => {
+    return result.rows[0];
+  })
+}
+
+
+function getVoteCount(article_id){
+  const id = article_id;
+
+  return db.query('SELECT votes FROM articles WHERE article_id = $1', [id])
+  .then((result) => {
+    return result.rows[0]; 
+  })
+
+}
+
+
+module.exports={fetchArticleById, fetchArticles, checkArticleExists,updateArticle,getVoteCount}

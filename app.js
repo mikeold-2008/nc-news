@@ -2,7 +2,7 @@ const express = require("express")
 const app = express()
 const {getTopics} = require("./controllers/topics.controllers")
 const {getApi} = require("./controllers/api.controllers")
-const {getArticleById, getArticles} = require("./controllers/articles.controllers")
+const {getArticleById, getArticles, patchArticle} = require("./controllers/articles.controllers")
 const {getCommentsByArticleId,postComments} = require("./controllers/comments.controllers")
 
 
@@ -23,6 +23,8 @@ app.get('/api/articles/:article_id/comments',getCommentsByArticleId)
 
 app.post('/api/articles/:article_id/comments',postComments)
 
+app.patch('/api/articles/:article_id/',patchArticle)
+
 
 
 //Error handling:
@@ -31,7 +33,7 @@ app.get('*',(req,res) => {
 })
 
 app.use((err, req, res, next) => {
-    if(err.code === '23503'){
+    if(err.code === '23503' || err.code === '22P02'){
         res.status(400).send({msg: "Bad request"})
     }
 
