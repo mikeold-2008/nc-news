@@ -343,6 +343,7 @@ describe('/api/articles/:article_id/comments', () => {
 
 });
 
+
 describe('/api/comments/:comment_id', () => {
 
   test('DELETE 204: Responds with empty object upon successful comment deletion', () => {
@@ -373,8 +374,7 @@ describe('/api/comments/:comment_id', () => {
   });
 
 });
-
-
+ 
 
 describe('/api/users', () => {
   
@@ -384,6 +384,7 @@ describe('/api/users', () => {
     .expect(200)
     .then(({body}) => {
       const {users} = body
+      expect(users.length).not.toBe(0)
       users.forEach((user) => {
         expect(typeof user.username).toBe("string")
         expect(typeof user.name).toBe("string")
