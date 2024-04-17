@@ -73,10 +73,29 @@ describe('/api/articles:article_id', () => {
         .get('/api/articles/1')
         .expect(200)
         .then(({ body }) => {  
-        expect(body).toEqual(article)
+        expect(body).toMatchObject(article)
         })  
       })
 
+      test('GET 200: Responds with article and the comment_count total', () => {
+        const article = {
+          article_id: 1,
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(Number)
+        }
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({ body }) => {  
+        expect(body).toMatchObject(article)
+        })  
+      });
 
     test('GET 404: Responds with 404 for an article_id not found', () => {
         return request(app)
@@ -87,7 +106,6 @@ describe('/api/articles:article_id', () => {
         })  
     });
 
-
     test('GET 400: Resonds with error for an invalid article_id', () => {
         return request(app)
         .get('/api/articles/not-an-id-number')
@@ -96,7 +114,6 @@ describe('/api/articles:article_id', () => {
             expect(body.msg).toBe("Bad request")
         })  
     });
-
 
     test('PATCH 200: Responds with updated article vote count when passed a valid article ID (positive number)', () => {
       let voteNumber = {inc_votes: 50}
@@ -133,7 +150,6 @@ describe('/api/articles:article_id', () => {
     })  
     });
 
-
     test('PATCH 404: Responds with not found for invalid article ID number', () => {
     let voteNumber = {inc_votes: 50}
     return request(app)
@@ -144,7 +160,6 @@ describe('/api/articles:article_id', () => {
       expect(body.msg).toBe("Article ID not found")
     })  
     });
-
 
     test('PATCH 400: Responds with bad request for invalid fields', () => {
     let voteNumber = {inc_votes: "not-a-number"}
@@ -166,8 +181,7 @@ describe('/api/articles:article_id', () => {
       .then(({ body }) => {  
       expect(body.msg).toBe("Bad request")
       })  
-      });
-
+    });
 
 });
 
@@ -460,3 +474,5 @@ describe('/api/users', () => {
 
 
 });
+
+
