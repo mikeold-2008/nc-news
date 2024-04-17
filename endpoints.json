@@ -42,7 +42,7 @@
   },
   "GET /api/articles/": {
     "description": "retrieves a list of all articles",
-    "queries": [],
+    "queries": ["topic"],
     "exampleResponse": [
       {
         "author": "icellusedkars",
