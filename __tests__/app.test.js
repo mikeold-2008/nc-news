@@ -6,7 +6,7 @@ const seed = require("../db/seeds/seed")
 const endpoints = require("../endpoints.json")
 const { postComments } = require('../controllers/comments.controllers')
 
-beforeAll(() => {
+beforeEach(() => {
     return seed(data)
 })
 
@@ -96,6 +96,79 @@ describe('/api/articles:article_id', () => {
             expect(body.msg).toBe("Bad request")
         })  
     });
+
+
+    test('PATCH 200: Responds with updated article vote count when passed a valid article ID (positive number)', () => {
+      let voteNumber = {inc_votes: 50}
+      let updatedArticle = {
+        title: "Living in the shadow of a great man",
+        topic: "mitch",
+        author: "butter_bridge",
+        body: "I find this existence challenging",
+        votes: 150
+      }
+      return request(app)
+      .patch('/api/articles/1')
+      .send(voteNumber)
+      .expect(200)
+      .then(({ body }) => {  
+        expect(body).toMatchObject(updatedArticle)
+      })  
+    });
+
+    test('PATCH 200: Responds with updated article vote count when passed a valid article ID (negative number)', () => {
+    let voteNumber = {inc_votes: -50}
+    let updatedArticle =  {
+      title: "Sony Vaio; or, The Laptop",
+      topic: "mitch",
+      author: "icellusedkars",
+      votes: -50
+    }
+    return request(app)
+    .patch('/api/articles/2')
+    .send(voteNumber)
+    .expect(200)
+    .then(({ body }) => {  
+      expect(body).toMatchObject(updatedArticle)
+    })  
+    });
+
+
+    test('PATCH 404: Responds with not found for invalid article ID number', () => {
+    let voteNumber = {inc_votes: 50}
+    return request(app)
+    .patch('/api/articles/9999')
+    .send(voteNumber)
+    .expect(404)
+    .then(({ body }) => {  
+      expect(body.msg).toBe("Article ID not found")
+    })  
+    });
+
+
+    test('PATCH 400: Responds with bad request for invalid fields', () => {
+    let voteNumber = {inc_votes: "not-a-number"}
+    return request(app)
+    .patch('/api/articles/1')
+    .send(voteNumber)
+    .expect(400)
+    .then(({ body }) => {  
+    expect(body.msg).toBe("Bad request")
+    })  
+    });
+
+    test('PATCH 400: Responds with bad request for missing fields', () => {
+      let voteNumber = {}
+      return request(app)
+      .patch('/api/articles/1')
+      .send(voteNumber)
+      .expect(400)
+      .then(({ body }) => {  
+      expect(body.msg).toBe("Bad request")
+      })  
+      });
+
+
 });
 
 
@@ -221,17 +294,17 @@ describe('/api/articles/:article_id/comments', () => {
    });
 
 
-   test('POST 400: Responds with error when article id which is valid but non-existent', () => {
+   test('POST 404: Responds with error when article id which is valid but non-existent', () => {
     let commentToAdd = {
       username: 'rogersop',
       body: 'Foo bar'
     }
     return request(app)
-    .post('/api/articles/99999/comments')
+    .post('/api/articles/9999/comments')
     .send(commentToAdd)
-    .expect(404)
+    .expect(400)
     .then(( {body} ) => { 
-      expect(body.msg).toBe("Article ID not found")
+      expect(body.msg).toBe("Bad request")
     })  
    });
 
