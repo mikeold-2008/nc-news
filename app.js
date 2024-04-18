@@ -5,10 +5,10 @@ const {getApi} = require("./controllers/api.controllers")
 const {getArticleById, getArticles, patchArticle} = require("./controllers/articles.controllers")
 const {getCommentsByArticleId,postComments,deleteCommentById} = require("./controllers/comments.controllers")
 const {getUsers} = require("./controllers/users.controllers")
+const {handlePsqlErrors,handleServerErrors} = require('./errors/index.js');
+
 
 app.use(express.json())
-
-
 
 app.get('/api/topics', getTopics)
 
@@ -28,24 +28,15 @@ app.delete('/api/comments/:comment_id',deleteCommentById)
 
 app.get('/api/users',getUsers)
 
-
-
-//Error handling:
 app.get('*',(req,res) => {
     res.status(404).send({msg : "Not found"})
 })
 
-app.use((err, req, res, next) => {
-    if(err.code==='23503' || err.code==='22P02' || err.code==='23502'){
-        res.status(400).send({msg: "Bad request"})
-    }
-    res.status(err.status).send({msg : err.msg})
-    next(err)
-})
 
-app.use((err, req, res, next) => {
-    res.status(500).send({msg : "Internal server error"})
-})
+app.use(handlePsqlErrors);
+
+app.use(handleServerErrors)
+
 
 
 module.exports = app;
