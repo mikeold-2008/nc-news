@@ -4,7 +4,7 @@
 
 This probject is a backend API for a social media news and comment service. Users are able to read and post articles and comments, and upvote their favourites. This project was built using Node, PSQL and Express. Test-driven development performed with Jest and Supertest.
 
-Hosted Link: https://nc-news-ldv7.onrender.com/
+Hosted Link: https://nc-news-ldv7.onrender.com/api/
 
 **Requirements**
 
