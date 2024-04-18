@@ -7,6 +7,7 @@ This probject is a backend API for a social media news and comment service. User
 Hosted Link: https://nc-news-ldv7.onrender.com/
 
 **Requirements**
+
 Dependencies:
 psql v. 15.6
 node v. 18.13    
