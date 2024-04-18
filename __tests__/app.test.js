@@ -236,13 +236,69 @@ describe('/api/articles', () => {
       }) 
 
     test('GET 404: (Filter) Responds with not found when filtering by topic that doesnt exist', () => {
-      return request(app)
-      .get('/api/articles?topic=notatopic')
-      .expect(404)
-      .then(({ body }) => {
-      expect(body.msg).toBe("Not found")
-      })  
+        return request(app)
+        .get('/api/articles?topic=notatopic')
+        .expect(404)
+        .then(({ body }) => {
+        expect(body.msg).toBe("Not found")
+        })  
       }) 
+
+    test('GET 200: (Sort) Responds with 200 & data sorted by given criteria (returns array of articles)', () => {
+        return request(app)
+        .get('/api/articles?sort_by=article_id&order=asc')
+        .expect(200)
+        .then(({ body }) => {
+        const articles = body
+        expect(articles.length).not.toBe(0)
+        expect(articles).toBeSortedBy("article_id",{coerce:true})
+        })  
+    }) 
+
+    test('GET 200: (Sort) Responds with 200 & default sort order if not specified (returns array of articles)', () => {
+      return request(app)
+      .get('/api/articles?sort_by=article_id')
+      .expect(200)
+      .then(({ body }) => {
+      const articles = body
+      expect(articles.length).not.toBe(0)
+      expect(articles).toBeSortedBy("article_id",{descending:true,coerce:true})
+      })  
+    }) 
+
+    test('GET 200: (Sort & Filter) Responds with 200 & array of sorted articles when filtered by topic)', () => {
+      return request(app)
+      .get('/api/articles?topic=mitch&sort_by=article_id&order=asc')
+      .expect(200)
+      .then(({ body }) => {
+      const articles = body
+      expect(articles).toHaveLength(12)
+      articles.forEach((article) => {
+        expect(article.topic).toEqual("mitch")
+      })
+      expect(articles).toBeSortedBy("article_id",{coerce:true})
+      })  
+    }) 
+
+    test('GET 400: (Sort) Responds with 400/bad request if sort criteria is invalid', () => {
+    return request(app)
+    .get('/api/articles?sort_by=not-a-sort-column')
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request")
+    })  
+    }) 
+
+    test('GET 400: (Sort) Responds with 400/bad request if sort order is invalid', () => {
+    return request(app)
+    .get('/api/articles?sort_by=article_id&order=not-a-sort-order')
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request")
+    })  
+    }) 
+
+
 
 });
 
