@@ -20,7 +20,6 @@ app.get('/api/articles', getArticles)
 
 app.get('/api/articles/:article_id/comments',getCommentsByArticleId)
 
-
 app.post('/api/articles/:article_id/comments',postComments)
 
 app.patch('/api/articles/:article_id/',patchArticle)
@@ -37,16 +36,15 @@ app.get('*',(req,res) => {
 })
 
 app.use((err, req, res, next) => {
-    if(err.code === '23503' || err.code === '22P02' || err.code==='23502'){
+    if(err.code==='23503' || err.code==='22P02' || err.code==='23502'){
         res.status(400).send({msg: "Bad request"})
     }
-
     res.status(err.status).send({msg : err.msg})
     next(err)
 })
 
 app.use((err, req, res, next) => {
-    res.status(500).send({msg : "internal server error"})
+    res.status(500).send({msg : "Internal server error"})
 })
 
 
