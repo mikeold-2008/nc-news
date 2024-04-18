@@ -501,7 +501,7 @@ describe('/api/comments/:comment_id', () => {
 
 describe('/api/users', () => {
   
-  test('GET 200: Responds with list of users', () => {
+test('GET 200: Responds with list of users', () => {
     return request(app)
     .get('/api/users')
     .expect(200)
@@ -514,11 +514,40 @@ describe('/api/users', () => {
         expect(typeof user.avatar_url).toBe("string")
       })
     })    
-  });
-
-
-
+});
 
 });
 
+
+describe('/api/users/:username', () => {
+  
+  test('GET 200: Responds with the requested user', () => {
+    const userObject = {
+      username: expect.any(String),
+      name: expect.any(String),
+      avatar_url: expect.any(String)
+    }
+    return request(app)
+    .get('/api/users/butter_bridge')
+    .expect(200)
+    .then(({body}) => {
+    const {user} = body        
+      expect(user).toMatchObject(userObject)
+    })    
+  });
+
+
+  test('GET 404: Responds with 404 if username doesnt exist', () => {
+    return request(app)
+    .get('/api/users/not-a-username')
+    .expect(404)
+    .then(({body}) => {     
+      expect(body.msg).toEqual("Not found")
+    })    
+  });
+
+
+  
+  });
+  
 
