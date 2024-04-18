@@ -8,7 +8,9 @@ function getArticleById(req,res,next){
     .then((article) => {
         res.status(200).send(article)
     })
-    .catch(next)
+    .catch((err) => {
+        next(err)
+    })
 }   
 
 function getArticles(req,res,next){

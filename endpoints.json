@@ -139,7 +139,21 @@
       }
       ]
     }
+  },
+  "GET /api/users/:username": {
+    "description": "retrieves the user which matching the specified username",
+    "queries": [],
+    "exampleResponse":  {
+      "users" : 
+      {
+        "username": "username123",
+        "name": "jonny",
+        "avatar_url":
+          "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+      }
+    }
   }
+  
 
 
 }
