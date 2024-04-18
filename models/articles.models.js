@@ -29,8 +29,10 @@ function checkArticleExists(article_id){
 
 
 
-function fetchArticles(topic){
+function fetchArticles(topic,sort_by = "created_at",order = "desc"){
   const queryVals = []
+  const validQuery = ["article_id","title","topic","author","created_at","votes","img_url"]
+
 
   let sqlQueryString = 'SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT (comments.comment_id)::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id '
 
@@ -39,7 +41,7 @@ function fetchArticles(topic){
     queryVals.push(topic)
   }
   
-  sqlQueryString+='GROUP BY articles.article_id ORDER BY articles.created_at DESC'
+  sqlQueryString+=`GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`
 
 
   return db.query(sqlQueryString, queryVals)
