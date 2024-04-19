@@ -4,13 +4,18 @@ const {checkArticleExists} = require("../models/articles.models")
 
 function getCommentsByArticleId(req,res,next){
     const {article_id} = req.params
+    const {limit,p} = req.query
 
-    Promise.all([fetchCommentsByArticleId(article_id),checkArticleExists(article_id)])
-    .then(([comments]) => {
-        res.status(200).send(comments)
+    Promise.all([fetchCommentsByArticleId(article_id,limit,p),checkArticleExists(article_id)])
+    .then(([result]) => {
+        res.status(200).send(result)
     })
     .catch(next)
 }
+
+
+
+
 
 
 function postComments(req,res,next){

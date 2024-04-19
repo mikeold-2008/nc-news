@@ -1,6 +1,6 @@
 const app = require("../app")
 
-const psqlErrCodes = ['23503','22P02','23502','42703','42601']
+const psqlErrCodes = ['23503','22P02','23502','42703','42601','2201X','2201W']
 
 exports.handlePsqlErrors = ((err, req, res, next) => {
     if(psqlErrCodes.includes(err.code)){

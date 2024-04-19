@@ -174,8 +174,8 @@ describe('/api/articles', () => {
     .get('/api/articles')
     .expect(200)
     .then(({ body }) => {
-    const articles = body
-    expect(articles).toHaveLength(13)
+    const {articles} = body
+    expect(articles.length).not.toBe(0)
     expect(articles).toBeSortedBy("created_at",{descending: true,coerce:true})
         articles.forEach((article) => {
         expect(typeof article.author).toBe("string")
@@ -196,8 +196,8 @@ describe('/api/articles', () => {
       .get('/api/articles?topic=mitch')
       .expect(200)
       .then(({ body }) => {
-      const articles = body
-      expect(articles).toHaveLength(12)
+      const {articles} = body
+      expect(articles.length).not.toBe(0)
       expect(articles).toBeSortedBy("created_at",{descending: true,coerce:true})
           articles.forEach((article) => {
           expect(typeof article.author).toBe("string")
@@ -218,8 +218,8 @@ describe('/api/articles', () => {
         .get('/api/articles?notatopic=mitch')
         .expect(200)
         .then(({ body }) => {
-        const articles = body
-        expect(articles).toHaveLength(13)
+        const {articles} = body
+        expect(articles.length).not.toBe(0)
         expect(articles).toBeSortedBy("created_at",{descending: true,coerce:true})
             articles.forEach((article) => {
             expect(typeof article.author).toBe("string")
@@ -249,7 +249,7 @@ describe('/api/articles', () => {
         .get('/api/articles?sort_by=article_id&order=asc')
         .expect(200)
         .then(({ body }) => {
-        const articles = body
+        const {articles} = body
         expect(articles.length).not.toBe(0)
         expect(articles).toBeSortedBy("article_id",{coerce:true})
         })  
@@ -260,7 +260,7 @@ describe('/api/articles', () => {
       .get('/api/articles?sort_by=article_id')
       .expect(200)
       .then(({ body }) => {
-      const articles = body
+      const {articles} = body
       expect(articles.length).not.toBe(0)
       expect(articles).toBeSortedBy("article_id",{descending:true,coerce:true})
       })  
@@ -271,8 +271,8 @@ describe('/api/articles', () => {
       .get('/api/articles?topic=mitch&sort_by=article_id&order=asc')
       .expect(200)
       .then(({ body }) => {
-      const articles = body
-      expect(articles).toHaveLength(12)
+      const {articles} = body
+      expect(articles.length).not.toBe(0)
       articles.forEach((article) => {
         expect(article.topic).toEqual("mitch")
       })
@@ -298,6 +298,61 @@ describe('/api/articles', () => {
     })  
     }) 
 
+    test('GET 200: (Pagination) Responds with 200 & with array of paginated articles (default values)', () => {
+      return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({ body }) => {
+      const {total_count,articles} = body
+      expect(articles).toHaveLength(10)
+      expect(articles).toBeSortedBy("created_at",{descending: true,coerce:true})
+      expect(total_count).toBe(13)
+      })  
+    }) 
+
+    test('GET 200: (Pagination) Responds with 200 & with array of paginated articles (specified values, sort and filter applied)', () => {
+      return request(app)
+      .get('/api/articles?limit=5&p=2&sort_by=article_id&order=asc&topic=mitch')
+      .expect(200)
+      .then(({ body }) => {
+      const {total_count,articles} = body
+      expect(articles).toHaveLength(5)
+      expect(articles).toBeSortedBy("article_id",{coerce:true})
+      expect(total_count).toBe(12)
+      articles.forEach((article) => {
+      expect(article.article_id).toBeGreaterThan(5)
+      })
+      })  
+    }) 
+
+    test('GET 400: (Pagination) Responds with bad request when invalid limit given', () => {
+      return request(app)
+      .get('/api/articles?limit=not-a-limit&p=1')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request")
+      })  
+    }) 
+
+    test('GET 400: (Pagination) Responds with bad request when invalid p value given', () => {
+      return request(app)
+      .get('/api/articles?limit=10&p=-1')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request")
+      })  
+    }) 
+
+
+    test('GET 404: (Pagination) Responds with bad request when invalid limit value given', () => {
+      return request(app)
+      .get('/api/articles?limit=-1&p=1')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request")
+      })  
+    }) 
+  
 
 
 });
@@ -310,8 +365,8 @@ describe('/api/articles/:article_id/comments', () => {
     .get('/api/articles/1/comments')
     .expect(200)
     .then(({ body }) => {
-        const comments = body
-        expect(comments).toHaveLength(11)
+        const {comments} = body
+        expect(comments.length).not.toBe(0)
         comments.forEach((comment) => {
             expect(typeof comment.comment_id).toBe("number")
             expect(typeof comment.votes).toBe("number")
@@ -328,18 +383,18 @@ describe('/api/articles/:article_id/comments', () => {
     .get('/api/articles/1/comments')
     .expect(200)
     .then(({ body }) => {
-        const comments = body
+        const {comments} = body
         expect(comments).toBeSortedBy("created_at",{descending: true})
     })  
   });
 
 
-  test('GET 200: Responds with 200 and empty array for a valid article_id which has no comments associated', () => {
+  test('GET 404: Responds with 404 and empty array for a valid article_id which has no comments associated', () => {
   return request(app)
   .get('/api/articles/4/comments')
-  .expect(200)
+  .expect(404)
   .then(({ body }) => {  
-  expect(body).toEqual([])
+  expect(body.msg).toEqual("Not found")
   })  
   });
 
@@ -463,6 +518,57 @@ describe('/api/articles/:article_id/comments', () => {
         expect(body.msg).toBe("Bad request");
       });
   });
+
+
+  test('GET 200: (Pagination) Responds with 200 & with array of paginated comments (default pagination))', () => {
+    return request(app)
+    .get('/api/articles/1/comments?limit=10&p=1')
+    .expect(200)
+    .then(({ body }) => {
+    const {total_count,comments} = body
+    expect(comments).toHaveLength(10)
+    expect(total_count).toBe(11)
+    })  
+  }) 
+
+  test('GET 200: (Pagination) Responds with 200 & with array of paginated articles (specified values)', () => {
+    return request(app)
+    .get('/api/articles/1/comments?limit=5&p=1')
+    .expect(200)
+    .then(({ body }) => {
+    const {total_count,comments} = body
+    expect(comments).toHaveLength(5)
+    expect(total_count).toBe(11)
+    })  
+  }) 
+
+  test('GET 400: (Pagination) Responds with bad request when invalid limit given', () => {
+    return request(app)
+    .get('/api/articles/1/comments?limit=not-a-limit&p=1')
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request")
+    })  
+  }) 
+
+  test('GET 400: (Pagination) Responds with bad request when invalid p value given', () => {
+    return request(app)
+    .get('/api/articles/1/comments?limit=10&p=-1')
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request")
+    })  
+  }) 
+
+
+  test('GET 404: (Pagination) Responds with bad request when invalid limit value given', () => {
+    return request(app)
+    .get('/api/articles/1/comments?limit=-1&p=1')
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request")
+    })  
+  }) 
 
 });
 

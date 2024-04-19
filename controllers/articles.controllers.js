@@ -13,15 +13,40 @@ function getArticleById(req,res,next){
     })
 }   
 
+
+
+
+
+
+
+
+
+
 function getArticles(req,res,next){
-    const {topic,sort_by,order} = req.query
-    fetchArticles(topic,sort_by,order).then((articles) => {
-    res.status(200).send(articles)
+    const {topic,sort_by,order,limit,p} = req.query
+
+
+    Promise.all([fetchArticles(topic,sort_by,order,limit,p)])
+    .then((result) => {
+        res.status(200).send(result[0])
     })
     .catch((err) => {
         next(err)
     })
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 function patchArticle(req,res,next){
