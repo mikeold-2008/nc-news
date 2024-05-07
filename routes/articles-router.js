@@ -10,6 +10,6 @@ articlesRouter.get('/:article_id/comments',getCommentsByArticleId)
 
 articlesRouter.post('/:article_id/comments',postComments)
 
-articlesRouter.patch('/:article_id/',patchArticle)
+articlesRouter.patch('/:article_id',patchArticle)
 
 module.exports = articlesRouter;
