@@ -101,7 +101,7 @@
       }]
     }
   },
-  "PATCH /api/articles/:article:id/comments": {
+  "PATCH /api/articles/:article:id": {
     "description": "serves an updated article with an updated votes property votes",
     "queries": [],
     "bodyFormat": {"inc_votes": -100},

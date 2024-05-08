@@ -37,7 +37,7 @@ function checkArticleExists(article_id){
 
 function fetchArticles(topic,sort_by = "created_at",order = "desc",limit=10,p=1){
   const queryVals = []
-  const validSortQueries = ["article_id","title","topic","author","created_at","votes"]
+  const validSortQueries = ["article_id","title","topic","author","created_at","votes","comment_count"]
   const validOrderQueries = ["asc", "desc"];
 
   if (!validSortQueries.includes(sort_by)) {
