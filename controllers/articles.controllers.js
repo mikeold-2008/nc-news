@@ -25,6 +25,7 @@ function getArticleById(req,res,next){
 function getArticles(req,res,next){
     const {topic,sort_by,order,limit,p} = req.query
 
+     
 
     Promise.all([fetchArticles(topic,sort_by,order,limit,p)])
     .then((result) => {

@@ -57,11 +57,12 @@ function fetchArticles(topic,sort_by = "created_at",order = "desc",limit=10,p=1)
   }
   
   sqlQueryString+=`GROUP BY articles.article_id 
-  ORDER BY articles.${sort_by} ${order}`
+  ORDER BY ${sort_by} ${order}`
 
   const getTotal = db.query(sqlQueryString, queryVals);
 
   sqlQueryString+=` LIMIT ${limit} OFFSET ${(p - 1) * limit}`;
+
 
   const getArticles = db.query(sqlQueryString,queryVals)
 

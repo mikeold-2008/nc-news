@@ -257,12 +257,12 @@ describe('/api/articles', () => {
 
     test('GET 200: (Sort) Responds with 200 & default sort order if not specified (returns array of articles)', () => {
       return request(app)
-      .get('/api/articles?sort_by=article_id')
+      .get('/api/articles?sort_by=comment_count')
       .expect(200)
       .then(({ body }) => {
       const {articles} = body
       expect(articles.length).not.toBe(0)
-      expect(articles).toBeSortedBy("article_id",{descending:true,coerce:true})
+      expect(articles).toBeSortedBy("comment_count",{descending:true,coerce:true})
       })  
     }) 
 
